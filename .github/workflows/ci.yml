@@ -1,0 +1,52 @@
+name: NodeWe CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  RUSTFLAGS: -D warnings
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.95.0
+          components: rustfmt, clippy
+      - name: Cache Cargo artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: nodewe-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: nodewe-cargo-
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Test
+        run: cargo test --workspace --all-targets --locked
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Deployment unit hardening
+        run: bash scripts/check-deploy-units.sh
+      - name: Release build
+        run: cargo build --workspace --release --locked
+      - name: End-to-end integration
+        run: NODEWE_BIN_DIR="$PWD/target/release" bash scripts/integration.sh
+      - name: Multi-node integration
+        run: NODEWE_BIN_DIR="$PWD/target/release" bash scripts/multi-node-integration.sh
+
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4

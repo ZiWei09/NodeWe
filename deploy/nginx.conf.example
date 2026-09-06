@@ -1,0 +1,39 @@
+# Terminate TLS before forwarding to the local Control Plane service.
+# Use a real certificate, restricted cipher policy and mTLS for Node Runtime traffic.
+server {
+    listen 443 ssl;
+    server_name nodewe.example.invalid;
+
+    ssl_certificate /etc/nodewe/tls/fullchain.pem;
+    ssl_certificate_key /etc/nodewe/tls/privkey.pem;
+    ssl_protocols TLSv1.3;
+    ssl_session_tickets off;
+    ssl_client_certificate /etc/nodewe/tls/agent-ca.pem;
+
+    # Human/CLI API: bearer/OIDC authorization is checked by the application.
+    location / {
+        # Runtime traffic is handled by the more specific location below.
+        proxy_set_header X-NodeWe-Client-Verify "";
+        proxy_set_header X-NodeWe-Client-DN "";
+        proxy_pass http://127.0.0.1:8787;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Request-Id $request_id;
+        client_max_body_size 64k;
+    }
+
+    # Node Runtimes must present a client certificate. The application still
+    # verifies the per-node credential and revocation state.
+    location ^~ /v1/agent/ {
+        ssl_verify_client on;
+        proxy_set_header X-NodeWe-Client-Verify $ssl_client_verify;
+        proxy_set_header X-NodeWe-Client-DN $ssl_client_s_dn;
+        proxy_pass http://127.0.0.1:8787;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Request-Id $request_id;
+        client_max_body_size 64k;
+    }
+}

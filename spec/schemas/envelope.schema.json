@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://node-control.invalid/schema/envelope-v1.json",
+  "title": "Node Control protocol envelope",
+  "type": "object",
+  "required": ["protocol_version", "agent_version", "node_id", "request_id", "type", "payload"],
+  "properties": {
+    "protocol_version": { "const": 1 },
+    "agent_version": { "type": "string", "minLength": 1 },
+    "node_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "type": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]+$" },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}

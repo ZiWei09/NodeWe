@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = ["node-runtime", "cli", "control-plane", "sdk", "adapters"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

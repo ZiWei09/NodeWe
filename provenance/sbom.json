@@ -1,0 +1,42 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "name": "nodewe",
+      "version": "0.1.0",
+      "licenses": [{"license": {"id": "Apache-2.0"}}]
+    }
+  },
+  "components": [
+    {"type": "library", "name": "cfg-if", "version": "1.0.4", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "getrandom", "version": "0.2.17", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "itoa", "version": "1.0.18", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "libc", "version": "0.2.189", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "memchr", "version": "2.8.3", "licenses": [{"license": {"expression": "Unlicense OR MIT"}}]},
+    {"type": "library", "name": "once_cell", "version": "1.21.4", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "proc-macro2", "version": "1.0.107", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "quote", "version": "1.0.47", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "rustls", "version": "0.23.43", "licenses": [{"license": {"expression": "Apache-2.0 OR ISC OR MIT"}}]},
+    {"type": "library", "name": "rustls-pki-types", "version": "1.15.1", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "rustls-webpki", "version": "0.103.14", "licenses": [{"license": {"expression": "ISC"}}]},
+    {"type": "library", "name": "ring", "version": "0.17.14", "licenses": [{"license": {"expression": "ISC"}}]},
+    {"type": "library", "name": "serde", "version": "1.0.229", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "serde_core", "version": "1.0.229", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "serde_derive", "version": "1.0.229", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "serde_json", "version": "1.0.151", "licenses": [{"license": {"expression": "Apache-2.0 OR MIT"}}]},
+    {"type": "library", "name": "subtle", "version": "2.6.1", "licenses": [{"license": {"expression": "BSD-3-Clause"}}]},
+    {"type": "library", "name": "syn", "version": "3.0.3", "licenses": [{"license": {"expression": "MIT OR Apache-2.0"}}]},
+    {"type": "library", "name": "unicode-ident", "version": "1.0.24", "licenses": [{"license": {"expression": "(MIT OR Apache-2.0) AND Unicode-3.0"}}]},
+    {"type": "library", "name": "untrusted", "version": "0.9.0", "licenses": [{"license": {"expression": "ISC"}}]},
+    {"type": "library", "name": "zeroize", "version": "1.9.0", "licenses": [{"license": {"expression": "Apache-2.0 OR MIT"}}]},
+    {"type": "library", "name": "zmij", "version": "1.0.23", "licenses": [{"license": {"expression": "MIT"}}]}
+  ],
+  "properties": [
+    {"name": "runtime_dependencies", "value": "rustls 0.23.43; rustls-pki-types 1.15.1; ring 0.17.14; serde_json 1.0.151"},
+    {"name": "generated_by", "value": "manual NodeWe dependency inventory"},
+    {"name": "review_status", "value": "requires human license review before production"}
+  ]
+}

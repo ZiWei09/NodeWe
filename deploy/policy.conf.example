@@ -1,0 +1,15 @@
+# NodeWe Control Plane policy template.
+# Values are comma-separated. Unknown keys or unsupported abilities fail startup.
+allowed_abilities=file.read,file.write,task.exec,system.inspect
+approval_required=task.exec,file.write
+# Empty means no data-class restriction. Set explicitly for sensitive projects.
+# allowed_data_classes=research,restricted
+# Empty means any authenticated admin actor. Otherwise task requests must carry
+# one of these exact actor identifiers.
+# allowed_actors=operator,automation-ci
+# Empty means the Agent's built-in safe command set. Otherwise task.exec
+# accepts only these exact command basenames.
+# allowed_commands=echo,pwd,ls,cat,printf,uname
+# Empty means any Scope-relative path. Values are directory prefixes or exact
+# relative paths; traversal, absolute paths and backslashes are rejected.
+# allowed_paths=workspace,input
