@@ -1,0 +1,46 @@
+name: NodeWe Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  linux-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.95.0
+      - name: Build Linux release binaries
+        run: cargo build --release --bins --locked
+      - name: Package Linux release
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          package="nodewe-${version}-x86_64-unknown-linux-gnu"
+          mkdir -p "dist/${package}"
+          cp target/release/nodewe "dist/${package}/nodewe"
+          cp target/release/node-runtime "dist/${package}/node-runtime"
+          cp target/release/node-control-plane "dist/${package}/node-control-plane"
+          cp README.md RELEASE.md "dist/${package}/"
+          cp -R deploy scripts spec "dist/${package}/"
+          (cd "dist/${package}" && sha256sum nodewe node-runtime node-control-plane > SHA256SUMS)
+          tar -C dist -czf "dist/${package}.tar.gz" "${package}"
+          sha256sum "dist/${package}.tar.gz" > "dist/${package}.tar.gz.sha256"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "NodeWe ${version}" \
+            --generate-notes \
+            "dist/nodewe-${version}-x86_64-unknown-linux-gnu.tar.gz" \
+            "dist/nodewe-${version}-x86_64-unknown-linux-gnu.tar.gz.sha256"
