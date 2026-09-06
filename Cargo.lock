@@ -353,7 +353,7 @@ dependencies = [
 
 [[package]]
 name = "node-control-cli"
-version = "0.1.1"
+version = "0.1.3"
 dependencies = [
  "nodewe-runtime",
  "rustls",
@@ -362,7 +362,7 @@ dependencies = [
 
 [[package]]
 name = "node-control-plane"
-version = "0.1.1"
+version = "0.1.3"
 dependencies = [
  "postgres",
  "ring",
@@ -373,14 +373,14 @@ dependencies = [
 
 [[package]]
 name = "nodewe-adapters"
-version = "0.1.1"
+version = "0.1.3"
 dependencies = [
  "nodewe-sdk",
 ]
 
 [[package]]
 name = "nodewe-runtime"
-version = "0.1.1"
+version = "0.1.3"
 dependencies = [
  "libc",
  "ring",
@@ -390,7 +390,7 @@ dependencies = [
 
 [[package]]
 name = "nodewe-sdk"
-version = "0.1.1"
+version = "0.1.3"
 
 [[package]]
 name = "objc2-core-foundation"
