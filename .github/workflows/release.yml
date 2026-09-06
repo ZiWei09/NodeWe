@@ -10,7 +10,8 @@ permissions:
 
 jobs:
   linux-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -18,6 +19,8 @@ jobs:
           toolchain: 1.95.0
       - name: Build Linux release binaries
         run: cargo build --release --bins --locked
+      - name: Test workspace
+        run: cargo test --workspace --all-targets --locked
       - name: Package Linux release
         shell: bash
         run: |
@@ -30,9 +33,27 @@ jobs:
           cp target/release/node-control-plane "dist/${package}/node-control-plane"
           cp README.md RELEASE.md "dist/${package}/"
           cp -R deploy scripts spec "dist/${package}/"
-          (cd "dist/${package}" && sha256sum nodewe node-runtime node-control-plane > SHA256SUMS)
+          python3 scripts/check-linux-compatibility.py "dist/${package}"
+          for binary in nodewe node-runtime node-control-plane; do
+            test "$("dist/${package}/${binary}" --version)" = "${binary} ${version}"
+            ldd "dist/${package}/${binary}"
+          done
+          (cd "dist/${package}" && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
           tar -C dist -czf "dist/${package}.tar.gz" "${package}"
-          sha256sum "dist/${package}.tar.gz" > "dist/${package}.tar.gz.sha256"
+          (cd dist && sha256sum "${package}.tar.gz" > "${package}.tar.gz.sha256")
+      - name: Verify extracted release on Ubuntu 22.04
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          package="nodewe-${version}-x86_64-unknown-linux-gnu"
+          (cd dist && sha256sum -c "${package}.tar.gz.sha256")
+          verify_dir=$(mktemp -d)
+          tar -xzf "dist/${package}.tar.gz" -C "$verify_dir"
+          cd "$verify_dir/${package}"
+          sha256sum -c SHA256SUMS
+          bash scripts/check-deploy-units.sh
+          NODEWE_BIN_DIR="$PWD" bash scripts/integration.sh
+          NODEWE_BIN_DIR="$PWD" bash scripts/multi-node-integration.sh
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -41,6 +62,6 @@ jobs:
           gh release create "${GITHUB_REF_NAME}" \
             --repo "${GITHUB_REPOSITORY}" \
             --title "NodeWe ${version}" \
-            --generate-notes \
+            --notes-file release-notes.md \
             "dist/nodewe-${version}-x86_64-unknown-linux-gnu.tar.gz" \
             "dist/nodewe-${version}-x86_64-unknown-linux-gnu.tar.gz.sha256"

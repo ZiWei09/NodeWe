@@ -14,6 +14,8 @@ use std::process::{Command, Stdio};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 struct TlsOptions {
     config: std::sync::Arc<ClientConfig>,
     server_name: String,
@@ -59,7 +61,7 @@ impl Write for HttpStream {
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     if args == ["--version"] {
-        println!("node-runtime 0.1.0");
+        println!("node-runtime {VERSION}");
         return;
     }
     if args.is_empty() || args[0] == "--help" {
@@ -97,7 +99,7 @@ fn enroll(args: &[String]) -> Result<(), String> {
     let tls = load_tls_options(args, &endpoint)?;
     ensure_endpoint_safe(&endpoint, tls.is_some())?;
     let body = format!(
-        "{{\"grant_code\":\"{}\",\"grant_signature\":\"{}\",\"node_id\":\"{}\",\"name\":\"{}\",\"labels\":\"{}\",\"platform\":\"{}\",\"architecture\":\"{}\",\"version\":\"0.1.0\"}}",
+        "{{\"grant_code\":\"{}\",\"grant_signature\":\"{}\",\"node_id\":\"{}\",\"name\":\"{}\",\"labels\":\"{}\",\"platform\":\"{}\",\"architecture\":\"{}\",\"version\":\"{VERSION}\"}}",
         escape(&grant_code),
         escape(&grant_signature),
         escape(&node_id),
@@ -142,7 +144,7 @@ fn connect_polling(args: &[String]) -> Result<(), String> {
     let mut backoff_ms = 1_000_u64;
     loop {
         let body = format!(
-            "{{\"protocol_version\":{PROTOCOL_VERSION},\"node_id\":\"{}\",\"abilities\":\"{SUPPORTED_ABILITIES_CSV}\",\"platform\":\"{}\",\"architecture\":\"{}\",\"version\":\"0.1.0\"}}",
+            "{{\"protocol_version\":{PROTOCOL_VERSION},\"node_id\":\"{}\",\"abilities\":\"{SUPPORTED_ABILITIES_CSV}\",\"platform\":\"{}\",\"architecture\":\"{}\",\"version\":\"{VERSION}\"}}",
             escape(&node_id),
             std::env::consts::OS,
             std::env::consts::ARCH
@@ -278,7 +280,7 @@ fn websocket_session(
     websocket_handshake(&mut stream, endpoint, node_id, token)?;
     loop {
         let heartbeat = format!(
-            "{{\"protocol_version\":{PROTOCOL_VERSION},\"agent_version\":\"0.1.0\",\"node_id\":\"{}\",\"request_id\":\"{}\",\"type\":\"heartbeat\",\"abilities\":\"{SUPPORTED_ABILITIES_CSV}\",\"platform\":\"{}\",\"architecture\":\"{}\",\"version\":\"0.1.0\"}}",
+            "{{\"protocol_version\":{PROTOCOL_VERSION},\"agent_version\":\"{VERSION}\",\"node_id\":\"{}\",\"request_id\":\"{}\",\"type\":\"heartbeat\",\"abilities\":\"{SUPPORTED_ABILITIES_CSV}\",\"platform\":\"{}\",\"architecture\":\"{}\",\"version\":\"{VERSION}\"}}",
             escape(node_id),
             websocket_request_id(),
             std::env::consts::OS,
@@ -288,7 +290,7 @@ fn websocket_session(
         validate_heartbeat_ack(&heartbeat_response)?;
         println!("{heartbeat_response}");
         let tasks_request = format!(
-            "{{\"protocol_version\":1,\"agent_version\":\"0.1.0\",\"node_id\":\"{}\",\"request_id\":\"{}\",\"type\":\"tasks.request\"}}",
+            "{{\"protocol_version\":1,\"agent_version\":\"{VERSION}\",\"node_id\":\"{}\",\"request_id\":\"{}\",\"type\":\"tasks.request\"}}",
             escape(node_id),
             websocket_request_id()
         );
@@ -325,7 +327,7 @@ fn websocket_session(
                 Err(error) => ("failed", error, 1),
             };
             let result_message = format!(
-                "{{\"protocol_version\":1,\"agent_version\":\"0.1.0\",\"node_id\":\"{}\",\"request_id\":\"{}\",\"type\":\"task.result\",\"task_id\":\"{}\",\"lease_token\":\"{}\",\"state\":\"{}\",\"output\":\"{}\",\"output_sha256\":\"{}\",\"exit_code\":\"{}\"}}",
+                "{{\"protocol_version\":1,\"agent_version\":\"{VERSION}\",\"node_id\":\"{}\",\"request_id\":\"{}\",\"type\":\"task.result\",\"task_id\":\"{}\",\"lease_token\":\"{}\",\"state\":\"{}\",\"output\":\"{}\",\"output_sha256\":\"{}\",\"exit_code\":\"{}\"}}",
                 escape(node_id),
                 escape(&request_id),
                 escape(&task_id),

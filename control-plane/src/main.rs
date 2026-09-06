@@ -26,6 +26,8 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 #[derive(Clone)]
 struct State {
     admin_token: String,
@@ -332,14 +334,14 @@ fn main() {
         .iter()
         .any(|argument| argument == "--version" || argument == "-V")
     {
-        println!("node-control-plane 0.1.0");
+        println!("node-control-plane {VERSION}");
         return;
     }
     if arguments
         .iter()
         .any(|argument| argument == "--help" || argument == "-h")
     {
-        println!("NodeWe Control Plane 0.1.0\n\nEnvironment: NODEWE_ADMIN_TOKEN, NODEWE_GRANT_SECRET, NODEWE_DATA_DIR, NODEWE_STORAGE_BACKEND(snapshot|sqlite), NODEWE_BIND\nOIDC: NODEWE_OIDC_REQUIRED, NODEWE_OIDC_ISSUER, NODEWE_OIDC_AUDIENCE, NODEWE_OIDC_HS256_SECRET_FILE\nTLS/mTLS: NODEWE_TLS_CERT, NODEWE_TLS_KEY, NODEWE_TLS_CLIENT_CA");
+        println!("NodeWe Control Plane {VERSION}\n\nEnvironment: NODEWE_ADMIN_TOKEN, NODEWE_GRANT_SECRET, NODEWE_DATA_DIR, NODEWE_STORAGE_BACKEND(snapshot|sqlite), NODEWE_BIND\nOIDC: NODEWE_OIDC_REQUIRED, NODEWE_OIDC_ISSUER, NODEWE_OIDC_AUDIENCE, NODEWE_OIDC_HS256_SECRET_FILE\nTLS/mTLS: NODEWE_TLS_CERT, NODEWE_TLS_KEY, NODEWE_TLS_CLIENT_CA");
         return;
     }
     enforce_production_mode().expect("production configuration is incomplete");
@@ -1123,7 +1125,7 @@ fn websocket_envelope(
     payload: &str,
 ) -> String {
     format!(
-        "{{\"protocol_version\":1,\"agent_version\":\"0.1.0\",\"node_id\":\"{}\",\"request_id\":\"{}\",\"type\":\"{}\",\"payload\":{}}}",
+        "{{\"protocol_version\":1,\"agent_version\":\"{VERSION}\",\"node_id\":\"{}\",\"request_id\":\"{}\",\"type\":\"{}\",\"payload\":{}}}",
         esc(node_id),
         esc(request_id),
         esc(message_type),

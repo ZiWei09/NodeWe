@@ -13,7 +13,7 @@ env:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -27,8 +27,8 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: nodewe-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: nodewe-cargo-
+          key: ubuntu-22.04-rust-1.95-nodewe-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ubuntu-22.04-rust-1.95-nodewe-cargo-
       - name: Format
         run: cargo fmt --all -- --check
       - name: Test
@@ -46,7 +46,7 @@ jobs:
 
   dependency-review:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/dependency-review-action@v4
