@@ -64,15 +64,22 @@ fi
 if [[ "${NODEWE_REQUIRE_APPROVAL_RECORDS:-0}" != 1 ]]; then
   fail 'NODEWE_REQUIRE_APPROVAL_RECORDS=1 is required'
 fi
-if [[ "${NODEWE_OIDC_REQUIRED:-0}" != 1 ]]; then
-  fail 'NODEWE_OIDC_REQUIRED=1 is required for production operator authentication'
+auth_mode=${NODEWE_AUTH_MODE:-}
+if [[ -z "$auth_mode" ]]; then
+  if [[ "${NODEWE_OIDC_REQUIRED:-0}" == 1 ]]; then auth_mode=oidc; else auth_mode=token; fi
+fi
+if [[ "$auth_mode" != token && "$auth_mode" != oidc ]]; then
+  fail 'NODEWE_AUTH_MODE must be token or oidc'
+fi
+if [[ "$auth_mode" == oidc && "${NODEWE_OIDC_REQUIRED:-0}" != 1 ]]; then
+  fail 'NODEWE_OIDC_REQUIRED=1 is required when NODEWE_AUTH_MODE=oidc'
 fi
 
 oidc_configured=0
 if [[ -n "${NODEWE_OIDC_ISSUER:-}" || -n "${NODEWE_OIDC_AUDIENCE:-}" || -n "${NODEWE_OIDC_HS256_SECRET:-}" || -n "${NODEWE_OIDC_HS256_SECRET_FILE:-}" ]]; then
   oidc_configured=1
 fi
-if [[ "${NODEWE_OIDC_REQUIRED:-0}" == 1 || "$oidc_configured" == 1 ]]; then
+if [[ "$auth_mode" == oidc || "$oidc_configured" == 1 ]]; then
   if [[ -z "${NODEWE_OIDC_ISSUER:-}" ]]; then
     fail 'NODEWE_OIDC_ISSUER is required when OIDC is configured'
   fi

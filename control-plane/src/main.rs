@@ -603,7 +603,7 @@ fn load_oidc_config() -> Result<Option<OidcConfig>, String> {
     let issuer = env::var("NODEWE_OIDC_ISSUER").unwrap_or_default();
     let audience = env::var("NODEWE_OIDC_AUDIENCE").unwrap_or_default();
     let secret = load_secret_value("NODEWE_OIDC_HS256_SECRET", "NODEWE_OIDC_HS256_SECRET_FILE")?;
-    let required = env::var("NODEWE_OIDC_REQUIRED").as_deref() == Ok("1");
+    let required = env::var("NODEWE_OIDC_REQUIRED").as_deref() == Ok("1") || auth_mode()? == "oidc";
     let any_config = !issuer.is_empty() || !audience.is_empty() || secret.is_some();
     if !any_config {
         if required {
@@ -639,6 +639,22 @@ fn load_oidc_config() -> Result<Option<OidcConfig>, String> {
         admin_group,
         group_claim,
     }))
+}
+
+/// Select the operator authentication model. `token` is intended for a
+/// single trusted operator; `oidc` is for teams and enterprise deployments.
+/// The hosted `nodewe` mode is reserved for the future NodeWe identity service.
+fn auth_mode() -> Result<&'static str, String> {
+    match env::var("NODEWE_AUTH_MODE").as_deref() {
+        Ok("token") => Ok("token"),
+        Ok("oidc") => Ok("oidc"),
+        Ok("nodewe") => Err("NODEWE_AUTH_MODE=nodewe is not available in this release".into()),
+        Ok(value) => Err(format!(
+            "NODEWE_AUTH_MODE must be token or oidc, got {value}"
+        )),
+        Err(_) if env::var("NODEWE_OIDC_REQUIRED").as_deref() == Ok("1") => Ok("oidc"),
+        Err(_) => Ok("token"),
+    }
 }
 
 fn valid_claim_name(value: &str) -> bool {
@@ -3780,11 +3796,16 @@ fn enforce_production_mode() -> Result<(), String> {
         "NODEWE_REQUIRE_ENCRYPTED_STORE",
         "NODEWE_REQUIRE_SIGNED_GRANTS",
         "NODEWE_REQUIRE_APPROVAL_RECORDS",
-        "NODEWE_OIDC_REQUIRED",
     ] {
         if env::var(name).as_deref() != Ok("1") {
             return Err(format!("NODEWE_ENV=production requires {name}=1"));
         }
+    }
+    match auth_mode()? {
+        "token" => {}
+        "oidc" if env::var("NODEWE_OIDC_REQUIRED").as_deref() == Ok("1") => {}
+        "oidc" => return Err("NODEWE_AUTH_MODE=oidc requires NODEWE_OIDC_REQUIRED=1".into()),
+        _ => unreachable!(),
     }
     let data_dir = env::var("NODEWE_DATA_DIR")
         .map_err(|_| "NODEWE_ENV=production requires an explicit NODEWE_DATA_DIR".to_owned())?;
